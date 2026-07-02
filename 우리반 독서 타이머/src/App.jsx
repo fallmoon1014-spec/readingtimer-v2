@@ -14,6 +14,7 @@ function App() {
           return parsed.map(s => ({
             ...s,
             isRunning: false,
+            logs: s.logs || [], // Ensure logs array exists
           }));
         }
       } catch (e) {
@@ -28,10 +29,12 @@ function App() {
       totalTime: 0,
       isRunning: false,
       lastStartTime: null,
+      logs: [],
     }));
   });
 
   const [newStudentName, setNewStudentName] = useState('');
+  const [logModalStudentId, setLogModalStudentId] = useState(null);
 
   // Save to local storage whenever students change
   useEffect(() => {
@@ -49,6 +52,7 @@ function App() {
       totalTime: 0,
       isRunning: false,
       lastStartTime: null,
+      logs: [],
     };
 
     setStudents(prev => [...prev, newStudent]);
@@ -85,13 +89,29 @@ function App() {
   };
 
   const handleResetAllTimers = () => {
-    if (window.confirm('모든 번호의 오늘 독서 시간을 0초로 초기화하시겠습니까?')) {
-      setStudents(prev => prev.map(student => ({
-        ...student,
-        totalTime: 0,
-        isRunning: false,
-        lastStartTime: null,
-      })));
+    if (window.confirm('모든 번호의 오늘 독서 시간을 기록장에 저장하고 0초로 초기화하시겠습니까?')) {
+      const today = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+      
+      setStudents(prev => prev.map(student => {
+        // Only save log if they read something today
+        const updatedLogs = [...(student.logs || [])];
+        if (student.totalTime > 0 || student.isRunning) {
+          const sessionTime = student.isRunning ? Math.floor((Date.now() - student.lastStartTime) / 1000) : 0;
+          const finalTime = student.totalTime + sessionTime;
+          
+          if (finalTime > 0) {
+            updatedLogs.push({ date: today, time: finalTime });
+          }
+        }
+        
+        return {
+          ...student,
+          totalTime: 0,
+          isRunning: false,
+          lastStartTime: null,
+          logs: updatedLogs,
+        };
+      }));
     }
   };
 
@@ -103,16 +123,19 @@ function App() {
         totalTime: 0,
         isRunning: false,
         lastStartTime: null,
+        logs: [],
       }));
       setStudents(resetStudents);
     }
   };
 
+  const selectedStudentForLog = students.find(s => s.id === logModalStudentId);
+
   return (
     <div className="app-container">
       <header className="header">
         <h1>우리 반 독서 타이머 📚</h1>
-        <p>전자칠판에서 각자의 타이머를 눌러 독서를 시작해봐요!</p>
+        <p>오늘의 독서 목표를 달성해봐요!</p>
       </header>
 
       <div className="controls-wrapper">
@@ -132,11 +155,11 @@ function App() {
         <div className="reset-buttons">
           {students.length > 0 && (
             <button onClick={handleResetAllTimers} className="reset-btn">
-              🔄 오늘 독서시간 모두 0으로 리셋
+              🔄 기록장에 저장 & 0초로 리셋
             </button>
           )}
           <button onClick={handleHardReset} className="hard-reset-btn">
-            ⚠️ 새 학년 완전 초기화 (1~25번 재생성)
+            ⚠️ 1~25번 완전 재생성
           </button>
         </div>
       </div>
@@ -145,7 +168,7 @@ function App() {
         {students.length === 0 ? (
           <div className="empty-state">
             아직 등록된 학생이 없습니다. <br/>
-            위에서 이름을 입력하고 추가해주세요!
+            위에서 번호를 추가해주세요!
           </div>
         ) : (
           students.map(student => (
@@ -154,10 +177,45 @@ function App() {
               student={student} 
               onToggleTimer={handleToggleTimer}
               onDelete={handleDeleteStudent}
+              onViewLog={setLogModalStudentId}
             />
           ))
         )}
       </div>
+
+      {logModalStudentId && selectedStudentForLog && (
+        <div className="modal-overlay" onClick={() => setLogModalStudentId(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{selectedStudentForLog.name} 독서 기록장 📖</h2>
+              <button className="close-btn" onClick={() => setLogModalStudentId(null)}>×</button>
+            </div>
+            
+            <div className="log-list">
+              {(!selectedStudentForLog.logs || selectedStudentForLog.logs.length === 0) ? (
+                <div className="empty-log">아직 저장된 독서 기록이 없습니다.<br/>오늘 독서를 마치고 리셋 버튼을 누르면 저장됩니다!</div>
+              ) : (
+                selectedStudentForLog.logs.map((log, index) => {
+                  const hours = Math.floor(log.time / 3600);
+                  const minutes = Math.floor((log.time % 3600) / 60);
+                  const seconds = log.time % 60;
+                  let timeString = '';
+                  if (hours > 0) timeString += `${hours}시간 `;
+                  if (minutes > 0) timeString += `${minutes}분 `;
+                  timeString += `${seconds}초`;
+
+                  return (
+                    <div key={index} className="log-item">
+                      <span className="log-date">{log.date}</span>
+                      <span className="log-time">{timeString}</span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

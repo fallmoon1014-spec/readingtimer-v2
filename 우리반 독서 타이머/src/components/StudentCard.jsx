@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Play, Pause, Trash2 } from 'lucide-react';
+import { Play, Pause, Trash2, Book } from 'lucide-react';
 import { formatTime } from '../utils/timeFormat';
 import './StudentCard.css';
 
-const StudentCard = ({ student, onToggleTimer, onDelete }) => {
+const StudentCard = ({ student, onToggleTimer, onDelete, onViewLog }) => {
   const [displayTime, setDisplayTime] = useState(student.totalTime);
 
   // Update the display time every second if the timer is running
@@ -27,13 +27,22 @@ const StudentCard = ({ student, onToggleTimer, onDelete }) => {
     <div className={`student-card ${student.isRunning ? 'running' : ''}`}>
       <div className="card-header">
         <h3 className="student-name">{student.name}</h3>
-        <button 
-          className="delete-btn" 
-          onClick={() => onDelete(student.id)}
-          title="학생 삭제"
-        >
-          <Trash2 size={16} />
-        </button>
+        <div className="card-actions">
+          <button 
+            className="icon-btn log-btn" 
+            onClick={() => onViewLog(student.id)}
+            title="독서 기록장"
+          >
+            <Book size={18} />
+          </button>
+          <button 
+            className="icon-btn delete-btn" 
+            onClick={() => onDelete(student.id)}
+            title="학생 삭제"
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
       </div>
       
       <div className="time-display">

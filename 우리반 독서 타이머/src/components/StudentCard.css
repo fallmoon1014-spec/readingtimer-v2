@@ -1,23 +1,25 @@
 .student-card {
   background: var(--card-bg);
-  border-radius: 1rem;
+  border-radius: 2rem; /* 동글동글한 모서리 */
   padding: 1.5rem;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   align-items: center;
   transition: all 0.3s ease;
-  border: 2px solid transparent;
+  border: 4px solid var(--border-color); /* 귀여운 굵은 테두리 */
 }
 
 .student-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
 }
 
 .student-card.running {
   border-color: var(--primary);
-  background: linear-gradient(to bottom, #ffffff, var(--primary-light));
+  background: var(--primary-light);
+  box-shadow: var(--shadow-lg);
 }
 
 .card-header {
@@ -29,19 +31,29 @@
 }
 
 .student-name {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-main);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
 }
 
-.delete-btn {
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-btn {
   background: transparent;
-  color: var(--text-muted);
-  padding: 0.25rem;
-  border-radius: 0.25rem;
+  padding: 0.4rem;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--text-muted);
+}
+
+.log-btn:hover {
+  color: var(--primary);
+  background-color: var(--primary-light);
 }
 
 .delete-btn:hover {
@@ -50,12 +62,21 @@
 }
 
 .time-display {
-  font-size: 2.5rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  font-size: 3rem;
+  font-weight: 800;
+  font-family: 'Nunito', sans-serif;
   color: var(--text-main);
-  margin-bottom: 1.5rem;
+  margin: 1rem 0 2rem 0;
   letter-spacing: -0.05em;
+  background: white;
+  padding: 1rem 2rem;
+  border-radius: 2rem;
+  border: 2px dashed var(--border-color);
+}
+
+.student-card.running .time-display {
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .toggle-btn {
