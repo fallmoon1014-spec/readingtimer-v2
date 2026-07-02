@@ -1,0 +1,88 @@
+.student-card {
+  background: var(--card-bg);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.student-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.student-card.running {
+  border-color: var(--primary);
+  background: linear-gradient(to bottom, #ffffff, var(--primary-light));
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.student-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.delete-btn {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  color: var(--danger);
+  background-color: #fee2e2;
+}
+
+.time-display {
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-main);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.05em;
+}
+
+.toggle-btn {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: white;
+}
+
+.toggle-btn.play {
+  background-color: var(--success);
+}
+
+.toggle-btn.play:hover {
+  background-color: var(--success-hover);
+}
+
+.toggle-btn.pause {
+  background-color: var(--primary);
+}
+
+.toggle-btn.pause:hover {
+  background-color: var(--primary-hover);
+}
