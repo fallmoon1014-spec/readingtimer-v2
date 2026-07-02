@@ -11,6 +11,13 @@ function App() {
       try {
         const parsed = JSON.parse(saved);
         if (parsed.length > 0) {
+          // 개인정보 보호 강제 조치: 이름에 숫자가 아닌 진짜 이름(문자열)이 섞여있으면 강제 리셋
+          const hasRealNames = parsed.some(s => !/^\d+번$/.test(s.name));
+          if (hasRealNames) {
+            console.warn("Privacy check failed: found real names. Resetting to numbers.");
+            throw new Error("Privacy check failed");
+          }
+
           return parsed.map(s => ({
             ...s,
             isRunning: false,
