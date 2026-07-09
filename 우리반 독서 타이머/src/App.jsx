@@ -46,6 +46,7 @@ function App() {
                 window.speechSynthesis.speak(msg);
               });
           }
+        }
       }
     }, 1000);
     return () => clearInterval(timer);
