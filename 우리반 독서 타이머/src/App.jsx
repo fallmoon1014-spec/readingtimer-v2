@@ -1,9 +1,55 @@
-import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Music, Play, Square } from 'lucide-react';
 import StudentCard from './components/StudentCard';
 import './App.css';
 
 function App() {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [targetTime, setTargetTime] = useState('08:57');
+  const [isReadingMode, setIsReadingMode] = useState(false);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(now);
+
+      if (isReadingMode) {
+        const currentHours = now.getHours().toString().padStart(2, '0');
+        const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+        const currentSeconds = now.getSeconds();
+
+        const [targetHours, targetMinutes] = targetTime.split(':');
+
+        if (currentHours === targetHours && currentMinutes === targetMinutes && currentSeconds === 0) {
+          setIsReadingMode(false);
+          if (audioRef.current) {
+            audioRef.current.pause();
+          }
+
+          const msg = new SpeechSynthesisUtterance("독서 시간이 종료되었습니다.");
+          msg.lang = 'ko-KR';
+          window.speechSynthesis.speak(msg);
+        }
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isReadingMode, targetTime]);
+
+  const handleToggleReadingMode = () => {
+    if (!isReadingMode) {
+      if (audioRef.current) {
+        audioRef.current.play().catch(e => console.error("Audio play failed:", e));
+      }
+      setIsReadingMode(true);
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      setIsReadingMode(false);
+    }
+  };
+
   // Load initial state from local storage or create 1~25
   const [students, setStudents] = useState(() => {
     const saved = localStorage.getItem('reading-timers');
@@ -163,6 +209,43 @@ function App() {
         <p>오늘의 독서 목표를 달성해봐요!</p>
       </header>
 
+      {/* Corner Timer */}
+      <div className={`corner-timer ${isReadingMode ? 'active' : ''}`}>
+        <div className="corner-clock">
+          {currentTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+        </div>
+        <div className="corner-controls">
+          <div className="corner-target-group">
+            <span className="corner-target-label">종료 시각</span>
+            <input 
+              type="time" 
+              className="corner-time-input"
+              value={targetTime} 
+              onChange={(e) => setTargetTime(e.target.value)} 
+              disabled={isReadingMode}
+            />
+          </div>
+          <button 
+            type="button"
+            className={`corner-toggle-btn ${isReadingMode ? 'stop' : 'start'}`}
+            onClick={handleToggleReadingMode}
+            title={isReadingMode ? "독서 종료" : "독서 시작"}
+          >
+            {isReadingMode ? <Square size={16} /> : <Play size={16} />}
+          </button>
+        </div>
+        
+        <audio ref={audioRef} loop>
+          <source src="https://incompetech.com/music/royalty-free/mp3-royaltyfree/Gymnopedie%20No%201.mp3" type="audio/mpeg" />
+        </audio>
+        
+        {isReadingMode && (
+          <div className="corner-music-indicator">
+            <Music size={12} className="music-icon" /> 재생 중
+          </div>
+        )}
+      </div>
+
       <div className="controls-wrapper">
         <form className="controls" onSubmit={handleAddStudent}>
           <input 
@@ -207,6 +290,10 @@ function App() {
           ))
         )}
       </div>
+
+      <footer className="app-footer">
+        <p>Music: "Gymnopedie No 1" by Kevin MacLeod (incompetech.com) / Licensed under CC BY 4.0</p>
+      </footer>
 
       {logModalStudentId && selectedStudentForLog && (
         <div className="modal-overlay" onClick={() => setLogModalStudentId(null)}>
