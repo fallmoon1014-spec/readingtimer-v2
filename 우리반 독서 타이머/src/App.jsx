@@ -27,9 +27,24 @@ function App() {
             audioRef.current.pause();
           }
 
-          const msg = new SpeechSynthesisUtterance("독서 시간이 종료되었습니다.");
-          msg.lang = 'ko-KR';
-          window.speechSynthesis.speak(msg);
+          const alertAudio = new Audio(`${import.meta.env.BASE_URL}sound.mp3`);
+          
+          // Play alert, then speak when it finishes
+          alertAudio.play()
+            .then(() => {
+              alertAudio.onended = () => {
+                const msg = new SpeechSynthesisUtterance("독서 시간이 종료되었습니다.");
+                msg.lang = 'ko-KR';
+                window.speechSynthesis.speak(msg);
+              };
+            })
+            .catch(e => {
+              console.error("Alert play failed:", e);
+              // Fallback to speaking immediately if sound fails
+              const msg = new SpeechSynthesisUtterance("독서 시간이 종료되었습니다.");
+              msg.lang = 'ko-KR';
+              window.speechSynthesis.speak(msg);
+            });
         }
       }
     }, 1000);
@@ -236,7 +251,7 @@ function App() {
         </div>
         
         <audio ref={audioRef} loop>
-          <source src="https://incompetech.com/music/royalty-free/mp3-royaltyfree/Gymnopedie%20No%201.mp3" type="audio/mpeg" />
+          <source src={`${import.meta.env.BASE_URL}bgm.mp3`} type="audio/mpeg" />
         </audio>
         
         {isReadingMode && (
