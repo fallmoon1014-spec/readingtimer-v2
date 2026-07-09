@@ -8,6 +8,7 @@ function App() {
   const [targetTime, setTargetTime] = useState('08:57');
   const [isReadingMode, setIsReadingMode] = useState(false);
   const audioRef = useRef(null);
+  const alertAudioRef = useRef(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -27,25 +28,24 @@ function App() {
             audioRef.current.pause();
           }
 
-          const alertAudio = new Audio(`${import.meta.env.BASE_URL}sound.mp3`);
-          
-          // Play alert, then speak when it finishes
-          alertAudio.play()
-            .then(() => {
-              alertAudio.onended = () => {
+          if (alertAudioRef.current) {
+            // Play alert, then speak when it finishes
+            alertAudioRef.current.play()
+              .then(() => {
+                alertAudioRef.current.onended = () => {
+                  const msg = new SpeechSynthesisUtterance("독서 시간이 종료되었습니다.");
+                  msg.lang = 'ko-KR';
+                  window.speechSynthesis.speak(msg);
+                };
+              })
+              .catch(e => {
+                console.error("Alert play failed:", e);
+                // Fallback
                 const msg = new SpeechSynthesisUtterance("독서 시간이 종료되었습니다.");
                 msg.lang = 'ko-KR';
                 window.speechSynthesis.speak(msg);
-              };
-            })
-            .catch(e => {
-              console.error("Alert play failed:", e);
-              // Fallback to speaking immediately if sound fails
-              const msg = new SpeechSynthesisUtterance("독서 시간이 종료되었습니다.");
-              msg.lang = 'ko-KR';
-              window.speechSynthesis.speak(msg);
-            });
-        }
+              });
+          }
       }
     }, 1000);
     return () => clearInterval(timer);
@@ -249,9 +249,12 @@ function App() {
             {isReadingMode ? <Square size={16} /> : <Play size={16} />}
           </button>
         </div>
-        
         <audio ref={audioRef} loop>
           <source src={`${import.meta.env.BASE_URL}bgm.mp3`} type="audio/mpeg" />
+        </audio>
+
+        <audio ref={alertAudioRef} preload="auto">
+          <source src={`${import.meta.env.BASE_URL}sound.mp3`} type="audio/mpeg" />
         </audio>
         
         {isReadingMode && (
